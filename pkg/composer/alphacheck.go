@@ -13,25 +13,28 @@ func (c *Composer) ComposeAlphaCheckResponse(response brevity.AlphaCheckResponse
 		if !response.Location.Bearing().IsMagnetic() {
 			log.Error().Stringer("bearing", response.Location.Bearing()).Msg("bearing provided to ComposeAlphaCheckResponse should be magnetic")
 		}
+		callerCallsign := c.composeCallsigns(response.Callsign)
+		controllerCallsign := c.composeCallsigns(c.Callsign)
+		_range := response.Location.Distance()
 		return NaturalLanguageResponse{
 			Subtitle: fmt.Sprintf(
 				"%s, %s, contact, alpha check bullseye %s/%d",
-				c.composeCallsigns(response.Callsign),
-				c.composeCallsigns(c.Callsign),
+				callerCallsign,
+				controllerCallsign,
 				response.Location.Bearing().String(),
-				int(response.Location.Distance().NauticalMiles()),
+				int(_range.NauticalMiles()),
 			),
 			Speech: fmt.Sprintf(
 				"%s, %s, contact, alpha check bullseye %s, %d",
-				c.composeCallsigns(response.Callsign),
-				c.composeCallsigns(c.Callsign),
+				callerCallsign,
+				controllerCallsign,
 				pronounceBearing(response.Location.Bearing()),
-				int(response.Location.Distance().NauticalMiles()),
+				int(_range.NauticalMiles()),
 			),
 		}
 	}
 
-	reply := response.Callsign + ", negative contact"
+	reply := response.Callsign + ", negative contact."
 	return NaturalLanguageResponse{
 		Subtitle: reply,
 		Speech:   reply,
