@@ -29,6 +29,8 @@ type Radar struct {
 	missionTime time.Time
 	// missionTimeLock protects missionTime.
 	missionTimeLock sync.RWMutex
+	// coalition is the player coalition.
+	coalition coalitions.Coalition
 	// bullsyses maps coalitions to their respective bullseye points.
 	bullseyes sync.Map
 	// contacts contains trackfiles for each aircraft.
@@ -58,8 +60,9 @@ type Radar struct {
 }
 
 // New creates a radar scope that consumes updates from the provided channels.
-func New(starts <-chan sim.Started, updates <-chan sim.Updated, fades <-chan sim.Faded, mandatoryThreatRadius unit.Length) *Radar {
+func New(coalition coalitions.Coalition, starts <-chan sim.Started, updates <-chan sim.Updated, fades <-chan sim.Faded, mandatoryThreatRadius unit.Length) *Radar {
 	return &Radar{
+		coalition:             coalition,
 		starts:                starts,
 		updates:               updates,
 		fades:                 fades,
@@ -102,9 +105,7 @@ func (r *Radar) Bullseye(coalition coalitions.Coalition) orb.Point {
 
 // Run consumes updates from the simulation channels until the context is cancelled.
 func (r *Radar) Run(ctx context.Context, wg *sync.WaitGroup) {
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			ticker := time.NewTicker(5 * time.Second)
 			select {
@@ -114,11 +115,9 @@ func (r *Radar) Run(ctx context.Context, wg *sync.WaitGroup) {
 				r.updateCenterPoint()
 			}
 		}
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case <-ctx.Done():
@@ -127,11 +126,9 @@ func (r *Radar) Run(ctx context.Context, wg *sync.WaitGroup) {
 				r.handleStarted()
 			}
 		}
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case <-ctx.Done():
@@ -140,16 +137,12 @@ func (r *Radar) Run(ctx context.Context, wg *sync.WaitGroup) {
 				r.handleUpdate(update)
 			}
 		}
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		r.collectFadedTrackfiles(ctx)
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for {
@@ -160,7 +153,7 @@ func (r *Radar) Run(ctx context.Context, wg *sync.WaitGroup) {
 				r.handleGarbageCollection()
 			}
 		}
-	}()
+	})
 
 	<-ctx.Done()
 }
