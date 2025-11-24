@@ -1375,6 +1375,7 @@ func init() {
 		s3Variants(),
 		tornadoVariants(),
 		mq9Variants(),
+		flagonVariants(),
 	} {
 		for _, data := range vars {
 			aircraftDataLUT[data.ACMIShortName] = data
