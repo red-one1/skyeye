@@ -106,7 +106,7 @@ func (t *Trackfile) Bullseye(bullseye orb.Point) brevity.Bullseye {
 	log.Debug().Int("Minute", latest.Time.Minute()).Msg("minute")
 	log.Debug().Int("Second", latest.Time.Second()).Msg("second")
 	trueBearing := spatial.TrueBearing(bullseye, latest.Point)
-	log.Debug().Float64("TrueBearing: ", trueBearing.Degrees())
+	log.Debug().Float64("TrueBearing: ", trueBearing.Degrees()).Msg("truebearing")
 	bearing := spatial.TrueBearing(bullseye, latest.Point).Magnetic(declination)
 	log.Debug().Float64("MagBearing: ", bearing.Degrees()).Msg("calculated bullseye bearing for group")
 	distance := spatial.Distance(bullseye, latest.Point)
