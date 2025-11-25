@@ -97,8 +97,18 @@ func (t *Trackfile) Update(f Frame) {
 func (t *Trackfile) Bullseye(bullseye orb.Point) brevity.Bullseye {
 	latest := t.LastKnown()
 	declination, _ := bearings.Declination(bullseye, latest.Time)
+	log.Debug().Float64("declination", declination.Degrees()).Msg("calculated declination")
+	log.Debug().Msg("time")
+	log.Debug().Int("Year", latest.Time.Year()).Msg("year")
+	log.Debug().Int("Month", int(latest.Time.Month())).Msg("month")
+	log.Debug().Int("Day", latest.Time.Day()).Msg("day")
+	log.Debug().Int("Hour", latest.Time.Hour()).Msg("hour")
+	log.Debug().Int("Minute", latest.Time.Minute()).Msg("minute")
+	log.Debug().Int("Second", latest.Time.Second()).Msg("second")
+	trueBearing := spatial.TrueBearing(bullseye, latest.Point)
+	log.Debug().Float64("TrueBearing: ", trueBearing.Degrees())
 	bearing := spatial.TrueBearing(bullseye, latest.Point).Magnetic(declination)
-	log.Debug().Float64("bearing", bearing.Degrees()).Msg("calculated bullseye bearing for group")
+	log.Debug().Float64("MagBearing: ", bearing.Degrees()).Msg("calculated bullseye bearing for group")
 	distance := spatial.Distance(bullseye, latest.Point)
 	return *brevity.NewBullseye(bearing, distance)
 }
@@ -129,7 +139,10 @@ func (t *Trackfile) IsLastKnownPointZero() bool {
 func (t *Trackfile) bestAvailableDeclination() unit.Angle {
 	latest := t.unsafeLastKnown()
 	declincation, err := bearings.Declination(latest.Point, latest.Time)
+	log.Debug().Float64("declination", declincation.Degrees()).Msg("declination")
+	//log.Debug().Err(err).Msg("declination = " + declincation.Degrees())
 	if err != nil {
+		log.Debug().Err(err).Msg("failed to get declination for trackfile")
 		return 0
 	}
 	return declincation

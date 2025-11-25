@@ -401,6 +401,7 @@ func run(_ *cobra.Command, _ []string) {
 	}
 
 	log.Info().Msg("starting application")
+	log.Info().Msg("debug version enabled")
 	app, err := application.NewApplication(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start application")
