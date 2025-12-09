@@ -76,6 +76,7 @@ $RECYCLE.BIN/
 
 # whisper.cpp project
 third_party/whisper.cpp
+third_party/proj*
 
 # whisper.cpp models
 *.bin
