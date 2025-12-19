@@ -32,7 +32,8 @@
         "bullsC": 345
       }
     },
-   {    "terrain":"caucasus",
+   {
+    "terrain":"caucasus",
       "points":
     {
        "a": { "lat":43.909111,
@@ -72,7 +73,8 @@
         "bullsC": 365.5713735362105
       }
     },
-       {    "terrain":"germanycw",
+       {
+    "terrain":"germanycw",
       "points":
     {
        "a": { "lat":52.926933,
@@ -110,46 +112,6 @@
         "bullsA": 202,
         "bullsB": 53,
         "bullsC": 369
-      }
-    },
-           {    "terrain":"syria",
-      "points":
-    {
-       "a": { "lat":35.4093027778,
-       "lon":34.5439527778} ,  
-      "b":  { "lat": 36.4593694444,
-       "lon":35.5744916667
- }   ,
-       "c": { "lat":34.1785694444
-, "lon": 38.7030583333 },
-       "bullseye": { "lat":35.0219166667
-, "lon": 35.9005583333
- }
-      },
-    "bearings": { "true": {
-        "ab": 41,
-        "ac": 111,
-        "cb": 313,
-        "bullsA": 291,
-        "bullsB": 352,
-        "bullsC": 111
-    },
-      "magnetic": {
-        "ab": 35,
-        "ac": 106,
-        "cb": 307,
-        "bullsA": 286,
-        "bullsB": 346,
-        "bullsC": 106
-      }
-    },
-    "distances": {
-        "ab": 80.6,
-        "ac": 218,
-        "cb": 204,
-        "bullsA": 70.2,
-        "bullsB": 87.5,
-        "bullsC": 147
       }
     }
    ]

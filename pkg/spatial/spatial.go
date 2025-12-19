@@ -18,6 +18,7 @@ import (
 func Distance(a, b orb.Point) unit.Length {
 	distanceMeters, err := CalculateDistance(a.Lat(), a.Lon(), b.Lat(), b.Lon())
 	if err != nil {
+		// Fallback to the original method if there's an error
 		return unit.Length(math.Abs(geo.Distance(a, b))) * unit.Meter
 	}
 
@@ -28,16 +29,22 @@ func Distance(a, b orb.Point) unit.Length {
 func TrueBearing(a, b orb.Point) bearings.Bearing {
 	bearing, err := CalculateBearing(a.Lat(), a.Lon(), b.Lat(), b.Lon())
 	if err != nil {
+		// Fallback to the original method if there's an error
 		direction := unit.Angle(BearingPlanar(a, b)) * unit.Degree
 		return bearings.NewTrueBearing(direction)
 	}
 
 	return bearings.NewTrueBearing(unit.Angle(bearing) * unit.Degree)
 }
-
 func BearingPlanar(from, to orb.Point) float64 {
+	// Delta X (Longitude difference)
 	deltaX := to[0] - from[0]
+
+	// Delta Y (Latitude difference)
 	deltaY := to[1] - from[1]
+
+	// However, if you *must* maintain the functions `rad2deg` and `deg2rad`,
+	// the simple math looks like this:
 	return rad2deg(math.Atan2(deltaX, deltaY))
 }
 
@@ -50,6 +57,8 @@ func PointAtBearingAndDistance(origin orb.Point, bearing bearings.Bearing, dista
 	if bearing.IsMagnetic() {
 		log.Warn().Stringer("bearing", bearing).Msg("bearing provided to PointAtBearingAndDistance should not be magnetic")
 	}
+	//return geo.PointAtBearingAndDistance(origin, bearing.Degrees(), distance.Meters())
+
 	return PointAtBearingAndDistanceUTM(origin.Lat(), origin.Lon(), bearing, distance)
 }
 

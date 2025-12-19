@@ -169,6 +169,7 @@ func TestTracking(t *testing.T) {
 				Name:      "Eagle 1",
 				Coalition: coalitions.Blue,
 			})
+			//now := time.Now()
 			now := time.Date(1999, 06, 11, 12, 0, 0, 0, time.UTC)
 
 			alt := 20000 * unit.Foot
@@ -179,8 +180,8 @@ func TestTracking(t *testing.T) {
 				Altitude: alt,
 				Heading:  test.heading,
 			})
-			dest := spatial.PointAtBearingAndDistance(trackfile.LastKnown().Point, bearings.NewTrueBearing(0), test.ΔY)
-			dest = spatial.PointAtBearingAndDistance(dest, bearings.NewTrueBearing(90*unit.Degree), test.ΔX)
+			dest := spatial.PointAtBearingAndDistance(trackfile.LastKnown().Point, bearings.NewTrueBearing(0), test.ΔY) // translate point in Y axis
+			dest = spatial.PointAtBearingAndDistance(dest, bearings.NewTrueBearing(90*unit.Degree), test.ΔX)            // translate point in X axis
 			trackfile.Update(Frame{
 				Time:     now,
 				Point:    dest,
@@ -192,14 +193,21 @@ func TestTracking(t *testing.T) {
 			assert.Equal(t, test.expectedDirection, trackfile.Direction())
 			if test.expectedDirection != brevity.UnknownDirection {
 				declination, err := bearings.Declination(dest, now)
+				//fmt.Printf("declination at %f,%f is %f\n", dest.Lat(), dest.Lon(), declination.Degrees())
 				require.NoError(t, err)
+				//fmt.Printf("NewTrueBearing(test.expectedApproxCourse) %f\n", bearings.NewTrueBearing(test.expectedApproxCourse).Degrees())
+				//fmt.Printf("NewTrueBearing(test.expectedApproxCourse).Magnetic(declination) %f\n", bearings.NewTrueBearing(test.expectedApproxCourse).Magnetic(declination).Degrees())
+				//fmt.Printf("trackfile.Course() %f\n", trackfile.Course().Degrees())
+
+				//fmt.Printf("trackfile.Speed() %f\n", trackfile.Speed().MetersPerSecond())
+
 				assert.InDelta(t, bearings.NewTrueBearing(test.expectedApproxCourse).Magnetic(declination).Degrees(), trackfile.Course().Degrees(), 0.5)
 			}
 		})
 	}
 }
 
-func TestBullseye(t *testing.T) {
+func TestBullseye(t *testing.T) { // tests bullseye calculations - bearing and distance to trackfile point given bullseye point
 	t.Parallel()
 	spatial.ResetTerrainToDefault()
 	spatial.ForceTerrain("Kola", spatial.KolaProjection())
@@ -208,7 +216,7 @@ func TestBullseye(t *testing.T) {
 		ACMIName:  "F-15C",
 		Name:      "Eagle 1",
 		Coalition: coalitions.Blue,
-	})
+	}) //		target:           orb.Point{33.405794, 69.047461},
 	now := time.Date(1999, 06, 11, 12, 0, 0, 0, time.UTC)
 	alt := 20000 * unit.Foot
 	heading := 0 * unit.Degree
@@ -216,33 +224,33 @@ func TestBullseye(t *testing.T) {
 		bullseye         orb.Point
 		expectedBearing  unit.Angle
 		expectedDistance unit.Length
-		tfPoint          orb.Point
+		tf_point         orb.Point
 	}{
 		{
 			bullseye:         orb.Point{22.867128, 68.474419},
-			tfPoint:          orb.Point{33.405794, 69.047461},
-			expectedBearing:  62 * unit.Degree,
+			tf_point:         orb.Point{33.405794, 69.047461}, // kola Sveromorsk-1
+			expectedBearing:  62 * unit.Degree,                // magnetic
 			expectedDistance: 232 * unit.NauticalMile,
 		},
 		{
 			bullseye:         orb.Point{22.867128, 68.474419},
-			tfPoint:          orb.Point{24.973478, 70.068836},
-			expectedBearing:  14 * unit.Degree,
+			tf_point:         orb.Point{24.973478, 70.068836}, // kola Banak
+			expectedBearing:  14 * unit.Degree,                // magnetic
 			expectedDistance: 106 * unit.NauticalMile,
 		},
 		{
 			bullseye:         orb.Point{22.867128, 68.474419},
-			tfPoint:          orb.Point{34.262989, 64.91865},
-			expectedBearing:  110 * unit.Degree,
+			tf_point:         orb.Point{34.262989, 64.91865}, // kola Poduzhemye
+			expectedBearing:  110 * unit.Degree,              // magnetic
 			expectedDistance: 345 * unit.NauticalMile,
 		},
 	}
 	for _, test := range testCases {
-		t.Run(fmt.Sprintf("%v -> %v", test.bullseye, test.tfPoint), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v -> %v", test.bullseye, test.tf_point), func(t *testing.T) {
 			t.Parallel()
 			trackfile.Update(Frame{
 				Time:     now,
-				Point:    test.tfPoint,
+				Point:    test.tf_point,
 				Altitude: alt,
 				Heading:  heading,
 			})

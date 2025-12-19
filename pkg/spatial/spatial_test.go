@@ -161,6 +161,31 @@ func TestDistance(t *testing.T) {
 	}
 }
 
+/*
+	func TestBullseye(t *testing.T) {
+		t.Parallel()
+		testCases := []struct {
+			a                orb.Point
+			b                orb.Point
+			expectedBearing  unit.Angle
+			expectedDistance unit.Length
+		}{ // kola tests
+			{
+				a:                orb.Point{33.405794, 69.047461},
+				b:                orb.Point{24.973478, 70.068836},
+				expectedDistance: 186 * unit.NauticalMile,
+				expectedBearing:  282 * unit.Degree,
+			},
+		}
+		for _, test := range testCases {
+			t.Run(fmt.Sprintf("%v -> %v", test.a, test.b), func(t *testing.T) {
+				t.Parallel()
+				actual := Bullseye(test.a, test.b)
+				assert.InDelta(t, test.expected.NauticalMiles(), actual.NauticalMiles(), 5)
+			})
+		}
+	}
+*/
 //nolint:paralleltest // serial because tests mutate global terrain state
 func TestTrueBearing(t *testing.T) {
 	testCases := loadSpatialFixtures(t)
@@ -374,12 +399,15 @@ func TestProjectionRoundTrip(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(fmt.Sprintf("lat=%f,lon=%f", test.lat, test.lon), func(t *testing.T) {
 			t.Parallel()
+			// Convert lat/lon to projection
 			x, z, err := LatLongToProjection(test.lat, test.lon)
 			require.NoError(t, err)
 
+			// Convert back to lat/lon
 			lat2, lon2, err := ProjectionToLatLong(x, z)
 			require.NoError(t, err)
 
+			// Verify round-trip accuracy (within 0.000001 degrees, ~0.1 meters)
 			assert.InDelta(t, test.lat, lat2, 0.000001, "latitude mismatch")
 			assert.InDelta(t, test.lon, lon2, 0.000001, "longitude mismatch")
 		})
