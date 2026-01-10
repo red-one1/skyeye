@@ -10,7 +10,9 @@ import (
 	"github.com/dharmab/skyeye/pkg/brevity"
 	"github.com/dharmab/skyeye/pkg/coalitions"
 	"github.com/dharmab/skyeye/pkg/encyclopedia"
+	"github.com/dharmab/skyeye/pkg/encyclopedia/terrains"
 	"github.com/dharmab/skyeye/pkg/sim"
+	"github.com/dharmab/skyeye/pkg/spatial"
 	"github.com/dharmab/skyeye/pkg/trackfiles"
 	"github.com/martinlindhe/unit"
 	"github.com/paulmach/orb"
@@ -57,6 +59,11 @@ type Radar struct {
 	pendingFades []sim.Faded
 	// pendingFadesLock protects pendingFades.
 	pendingFadesLock sync.RWMutex
+	// projection is the current Transverse Mercator projection based on the bullseye.
+	// This improves accuracy for distance/bearing calculations at extreme latitudes.
+	projection *spatial.Projection
+	// projectionLock protects projection.
+	projectionLock sync.RWMutex
 }
 
 // New creates a radar scope that consumes updates from the provided channels.
@@ -82,14 +89,22 @@ func (r *Radar) SetMissionTime(t time.Time) {
 
 // SetBullseye updates the bullseye point for the given coalition.
 // The bullseye point is the reference point for polar coordinates provided in [Group.Bullseye].
+// This also updates the Transverse Mercator projection based on the closest DCS terrain.
 func (r *Radar) SetBullseye(bullseye orb.Point, coalition coalitions.Coalition) {
 	current := r.Bullseye(coalition)
 	if current.Lon() != bullseye.Lon() || current.Lat() != bullseye.Lat() {
+		terrain := terrains.Closest(bullseye)
 		log.Info().
 			Int("coalitionID", int(coalition)).
 			Float64("lon", bullseye.Lon()).
 			Float64("lat", bullseye.Lat()).
+			Str("terrain", terrain.Name).
 			Msg("updating bullseye")
+
+		// Update projection based on closest terrain
+		r.projectionLock.Lock()
+		r.projection = terrain.Projection()
+		r.projectionLock.Unlock()
 	}
 	r.bullseyes.Store(coalition, bullseye)
 }
@@ -101,6 +116,34 @@ func (r *Radar) Bullseye(coalition coalitions.Coalition) orb.Point {
 		return orb.Point{}
 	}
 	return p.(orb.Point)
+}
+
+// Projection returns the current Transverse Mercator projection.
+// This projection should be used for distance and bearing calculations to improve
+// accuracy at extreme latitudes. Returns nil if no projection has been set.
+func (r *Radar) Projection() *spatial.Projection {
+	r.projectionLock.RLock()
+	defer r.projectionLock.RUnlock()
+	return r.projection
+}
+
+// withProjection returns a spatial.Option that uses the current projection.
+// This is a convenience helper for passing to spatial functions.
+func (r *Radar) withProjection() spatial.Option {
+	return spatial.WithProjection(r.Projection())
+}
+
+// setBullseyeForGroup computes and sets the bullseye for a group using the current projection.
+func (r *Radar) setBullseyeForGroup(grp *group) {
+	bullseyePoint := r.Bullseye(r.coalition)
+	if spatial.IsZero(bullseyePoint) {
+		return
+	}
+	groupPoint := grp.point()
+	declination := r.Declination(groupPoint)
+	bearing := spatial.TrueBearing(bullseyePoint, groupPoint, r.withProjection()).Magnetic(declination)
+	distance := spatial.Distance(bullseyePoint, groupPoint, r.withProjection())
+	grp.bullseye = brevity.NewBullseye(bearing, distance)
 }
 
 // Run consumes updates from the simulation channels until the context is cancelled.
