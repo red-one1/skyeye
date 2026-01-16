@@ -96,3 +96,5 @@ dev/
 .vscode/settings.json
 
 *.zip
+
+skyeye-2*.log

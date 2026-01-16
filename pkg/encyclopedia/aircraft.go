@@ -285,9 +285,10 @@ func f14Variants() []Aircraft {
 	return variants(
 		f14Data,
 		map[string]string{
-			"A-135-GR": "A",
-			"A":        "A",
-			"B":        "B",
+			"A-135-GR":       "A",
+			"A-135-GR-Early": "A",
+			"A":              "A",
+			"B":              "B",
 		},
 	)
 }
@@ -1339,6 +1340,58 @@ var aircraftData = []Aircraft{
 		},
 		PlatformDesignation: "Tu-126",
 		NATOReportingName:   "Moss",
+	},
+	{
+		ACMIShortName: "Tu_126",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Unarmed:   true,
+		},
+		PlatformDesignation: "Tu-126",
+		NATOReportingName:   "Moss",
+	},
+	{
+		ACMIShortName: "VSN_F104G",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Fighter:   true,
+		},
+		PlatformDesignation: "F-104",
+		TypeDesignation:     "F-104G",
+		OfficialName:        "Starfighter",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName: "VSN_F104C",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Fighter:   true,
+		},
+		PlatformDesignation: "F-104",
+		TypeDesignation:     "F-104C",
+		OfficialName:        "Starfighter",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName: "vwv_o-1",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Unarmed:   true,
+		},
+		PlatformDesignation: "O-1",
+		TypeDesignation:     "O-1",
+		OfficialName:        "Bird Dog",
+	},
+	{
+		ACMIShortName: "Tu_128M",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Fighter:   true,
+		},
+		PlatformDesignation: "Tu-128",
+		TypeDesignation:     "Tu-128M",
+		NATOReportingName:   "Fiddler",
+		threatRadius:        SAR2AR1Threat,
 	},
 }
 
