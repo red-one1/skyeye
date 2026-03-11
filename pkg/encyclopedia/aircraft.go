@@ -768,6 +768,17 @@ var aircraftData = []Aircraft{
 		NATOReportingName:   "Mainstay",
 	},
 	{
+		ACMIShortName: "A6E",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Attack:    true,
+		},
+		PlatformDesignation: "A-6",
+		TypeDesignation:     "A-6E",
+		OfficialName:        "Intruder",
+		Nickname:            "Double Ugly",
+	},
+	{
 		ACMIShortName: "AH-1W",
 		tags: map[AircraftTag]bool{
 			RotaryWing: true,
@@ -1241,6 +1252,26 @@ var aircraftData = []Aircraft{
 		OfficialName:        "Backfire",
 	},
 	{
+		ACMIShortName: "tu_22KD",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Unarmed:   true,
+		},
+		PlatformDesignation: "Tu-22",
+		TypeDesignation:     "Tu-22KD",
+		OfficialName:        "Blinder",
+	},
+	{
+		ACMIShortName: "tu_22D",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Unarmed:   true,
+		},
+		PlatformDesignation: "Tu-22",
+		TypeDesignation:     "Tu-22D",
+		OfficialName:        "Blinder",
+	},
+	{
 		ACMIShortName: "Tu-95MS",
 		tags: map[AircraftTag]bool{
 			FixedWing: true,
@@ -1290,6 +1321,17 @@ var aircraftData = []Aircraft{
 		TypeDesignation:     "UH-1H",
 		OfficialName:        "Iroquois",
 		Nickname:            "Huey",
+	},
+	{
+		ACMIShortName: "uh2a",
+		tags: map[AircraftTag]bool{
+			RotaryWing: true,
+			Unarmed:    true,
+		},
+		PlatformDesignation: "UH-2",
+		TypeDesignation:     "UH-2A",
+		OfficialName:        "Seasprite",
+		Nickname:            "Seasprite",
 	},
 	{
 		ACMIShortName: "UH-60A",
