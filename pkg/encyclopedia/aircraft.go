@@ -758,6 +758,28 @@ var aircraftData = []Aircraft{
 		OfficialName:        "Havoc",
 	},
 	{
+		ACMIShortName: "a_37_dragonfly",
+		tags: map[AircraftTag]bool{
+			FixedWing: true,
+			Attack:    true,
+		},
+		PlatformDesignation: "A-37",
+		TypeDesignation:     "A-37",
+		OfficialName:        "Dragonfly",
+	},
+
+	{
+		ACMIShortName: "vwv_ch46d_late",
+		tags: map[AircraftTag]bool{
+			RotaryWing: true,
+			Unarmed:    true,
+		},
+		PlatformDesignation: "CH-46",
+		TypeDesignation:     "CH-46D",
+		OfficialName:        "Sea Knight",
+	},
+
+	{
 		ACMIShortName: "A-50",
 		tags: map[AircraftTag]bool{
 			FixedWing: true,
