@@ -176,6 +176,22 @@ func a10Variants() []Aircraft {
 	)
 }
 
+func tu22Variants() []Aircraft {
+	return variants(
+		tu22Data,
+		map[string]string{
+			"":   "",
+			"KD": "KD",
+		},
+	)
+}
+
+var tu22Data = Aircraft{
+	tags:                sets.Of(FixedWing, Unarmed),
+	PlatformDesignation: "Tu-22",
+	NATOReportingName:   "Blinder",
+}
+
 var ah64Data = Aircraft{
 	tags:                sets.Of(RotaryWing, Attack),
 	PlatformDesignation: "AH-64",
@@ -494,7 +510,7 @@ var foxbatData = Aircraft{
 	tags:                sets.Of(FixedWing, Fighter),
 	PlatformDesignation: "MiG-25",
 	NATOReportingName:   "Foxbat",
-	threatRadius:        SAR1IRThreat,
+	threatRadius:        ExtendedThreat,
 }
 
 func foxbatVariants() []Aircraft {
@@ -503,6 +519,24 @@ func foxbatVariants() []Aircraft {
 		map[string]string{
 			"PD":  "PD",
 			"RBT": "RBT",
+		},
+	)
+}
+
+var flagonData = Aircraft{
+	tags:                sets.Of(FixedWing, Fighter),
+	ACMIShortName:       "Su_15",
+	PlatformDesignation: "Su-15",
+	NATOReportingName:   "Flagon",
+	threatRadius:        SAR2AR1Threat,
+}
+
+func flagonVariants() []Aircraft {
+	return variants(
+		flagonData,
+		map[string]string{
+			"":   "",
+			"TM": "TM",
 		},
 	)
 }
@@ -815,6 +849,13 @@ var aircraftData = []Aircraft{
 		NATOReportingName:   "Badger",
 	},
 	{
+		ACMIShortName:       "Tu-16",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Tu-16",
+		TypeDesignation:     "Tu-16",
+		NATOReportingName:   "Badger",
+	},
+	{
 		ACMIShortName:       "IL-76MD",
 		tags:                sets.Of(FixedWing, Unarmed),
 		PlatformDesignation: "Il-76",
@@ -1068,12 +1109,103 @@ var aircraftData = []Aircraft{
 		Nickname:            "Huey",
 	},
 	{
+		ACMIShortName:       "uh2a",
+		tags:                sets.Of(RotaryWing, Unarmed),
+		PlatformDesignation: "UH-2",
+		TypeDesignation:     "UH-2A",
+		OfficialName:        "Sea Sprite",
+	},
+	{
 		ACMIShortName:       "UH-60A",
 		tags:                sets.Of(RotaryWing, Unarmed),
 		PlatformDesignation: "UH-60",
 		TypeDesignation:     "UH-60A",
 		OfficialName:        "Black Hawk",
 		fuelReceiver:        ProbeAndDrogue,
+	},
+	{
+		ACMIShortName:       "a_37_dragonfly",
+		tags:                sets.Of(FixedWing, Attack),
+		PlatformDesignation: "A-37",
+		NATOReportingName:   "Dragonfly",
+		Nickname:            "Dragon",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "vwv_ch46d_late",
+		tags:                sets.Of(RotaryWing, Unarmed),
+		PlatformDesignation: "CH-46",
+		NATOReportingName:   "Sea Knight",
+		Nickname:            "Phrog",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "Yak_28",
+		tags:                sets.Of(FixedWing, Attack),
+		PlatformDesignation: "Yak-28",
+		NATOReportingName:   "Brewer",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "Bronco-OV-10A",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "OV-10",
+		OfficialName:        "Bronco",
+	},
+	{
+		ACMIShortName:       "vwv_o-1",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "O-1",
+		OfficialName:        "Bird Dog",
+	},
+	{
+		ACMIShortName:       "vwv_mig17f",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "MiG-17",
+		NATOReportingName:   "Fresco",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "Yak-40",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Yak-40",
+		NATOReportingName:   "Codling",
+	},
+	{
+		ACMIShortName:       "Tu-126",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Tu-126",
+		NATOReportingName:   "Moss",
+	},
+	{
+		ACMIShortName:       "Tu_126",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Tu-126",
+		NATOReportingName:   "Moss",
+	},
+	{
+		ACMIShortName:       "VSN_F104G",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "F-104",
+		TypeDesignation:     "F-104G",
+		OfficialName:        "Starfighter",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "VSN_F104C",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "F-104",
+		TypeDesignation:     "F-104C	",
+		OfficialName:        "Starfighter",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "Tu_128M",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "Tu-128",
+		TypeDesignation:     "Tu-128M",
+		NATOReportingName:   "Fiddler",
+		threatRadius:        SAR1IRThreat,
 	},
 }
 
@@ -1102,6 +1234,7 @@ func init() {
 		ftVariants(),
 		fencerVariants(),
 		foxbatVariants(),
+		flagonVariants(),
 		fulcrumVariants(),
 		frogfootVariants(),
 		kc135Variants(),
@@ -1110,6 +1243,7 @@ func init() {
 		s3Variants(),
 		tornadoVariants(),
 		mq9Variants(),
+		tu22Variants(),
 	} {
 		for _, data := range vars {
 			aircraftDataLUT[data.ACMIShortName] = data
