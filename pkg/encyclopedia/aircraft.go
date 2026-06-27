@@ -176,22 +176,6 @@ func a10Variants() []Aircraft {
 	)
 }
 
-func tu22Variants() []Aircraft {
-	return variants(
-		tu22Data,
-		map[string]string{
-			"":   "",
-			"KD": "KD",
-		},
-	)
-}
-
-var tu22Data = Aircraft{
-	tags:                sets.Of(FixedWing, Unarmed),
-	PlatformDesignation: "Tu-22",
-	NATOReportingName:   "Blinder",
-}
-
 var ah64Data = Aircraft{
 	tags:                sets.Of(RotaryWing, Attack),
 	PlatformDesignation: "AH-64",
@@ -1094,6 +1078,13 @@ var aircraftData = []Aircraft{
 		OfficialName:        "Bear",
 	},
 	{
+		ACMIShortName:       "vwv_mig21mf",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "MiG-21",
+		TypeDesignation:     "MiG-21MF",
+		OfficialName:        "Fishbed",
+	},
+	{
 		ACMIShortName:       "Tu-160",
 		tags:                sets.Of(FixedWing, Unarmed),
 		PlatformDesignation: "Tu-160",
@@ -1184,11 +1175,32 @@ var aircraftData = []Aircraft{
 		NATOReportingName:   "Moss",
 	},
 	{
+		ACMIShortName:       "tu_22KD",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Tu-22",
+		NATOReportingName:   "Blinder",
+	},
+	{
+		ACMIShortName:       "tu_22",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "Tu-22",
+		NATOReportingName:   "Blinder",
+	},
+	{
 		ACMIShortName:       "VSN_F104G",
 		tags:                sets.Of(FixedWing, Fighter),
 		PlatformDesignation: "F-104",
 		TypeDesignation:     "F-104G",
 		OfficialName:        "Starfighter",
+		threatRadius:        SAR1IRThreat,
+	},
+	{
+		ACMIShortName:       "F-100D",
+		tags:                sets.Of(FixedWing, Fighter),
+		PlatformDesignation: "F-100",
+		TypeDesignation:     "F-100D",
+		OfficialName:        "Super Sabre",
+		Nickname:            "Hun",
 		threatRadius:        SAR1IRThreat,
 	},
 	{
@@ -1243,7 +1255,6 @@ func init() {
 		s3Variants(),
 		tornadoVariants(),
 		mq9Variants(),
-		tu22Variants(),
 	} {
 		for _, data := range vars {
 			aircraftDataLUT[data.ACMIShortName] = data
