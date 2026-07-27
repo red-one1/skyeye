@@ -294,6 +294,7 @@ func f14Variants() []Aircraft {
 			"A-135-GR":       "A",
 			"A":              "A",
 			"B":              "B",
+			"BU":             "B",
 		},
 	)
 }
@@ -354,6 +355,24 @@ func fa18Variants() []Aircraft {
 			"A":        "A",
 			"C":        "C",
 			"C_hornet": "C",
+		},
+	)
+}
+
+var fa18SuperData = Aircraft{
+	tags:                sets.Of(FixedWing, Fighter),
+	PlatformDesignation: "FA-18",
+	OfficialName:        "Hornet",
+	threatRadius:        ExtendedThreat,
+	fuelReceiver:        ProbeAndDrogue,
+}
+
+func fa18SuperVariants() []Aircraft {
+	return variants(
+		fa18SuperData,
+		map[string]string{
+			"E": "E",
+			"F": "F",
 		},
 	)
 }
@@ -895,6 +914,13 @@ var aircraftData = []Aircraft{
 		OfficialName:        "Mainring",
 	},
 	{
+		ACMIShortName:       "EA-18G",
+		tags:                sets.Of(FixedWing, Unarmed),
+		PlatformDesignation: "EA-18G",
+		TypeDesignation:     "EA-18G",
+		OfficialName:        "Growler",
+	},
+	{
 		ACMIShortName:       "M-2000C",
 		tags:                sets.Of(FixedWing, Fighter),
 		PlatformDesignation: "Mirage 2000",
@@ -1255,6 +1281,7 @@ func init() {
 		s3Variants(),
 		tornadoVariants(),
 		mq9Variants(),
+		fa18SuperVariants(),
 	} {
 		for _, data := range vars {
 			aircraftDataLUT[data.ACMIShortName] = data
