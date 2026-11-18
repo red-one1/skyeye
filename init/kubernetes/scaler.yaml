@@ -1,0 +1,127 @@
+# skyeye-scaler (optional, always on): joins SRS as "SkyEye Scaler <id> [BOT]" on the SkyEye frequencies and,
+# every --scale-interval, POSTs {"action": "run"|"stop", "players": N, ...} to the webhook sidecar
+# (skyeye-scaler-webhook.py), which scales Deployment `skyeye`:
+#   - 1 when players > 0 (humans tuned to one of the frequencies; bots named "... [BOT]" do not count)
+#   - 0 on "stop" (nobody on the frequencies for --stop-delay)
+#   - 0 when no request arrived for WATCHDOG_SECONDS (the scaler cannot reach SRS)
+# The webhook listens on 127.0.0.1 only and its ServiceAccount may only scale the `skyeye` Deployment.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: skyeye-scaler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: skyeye-scaler
+rules:
+  - apiGroups: [apps]
+    resources: [deployments/scale]
+    resourceNames: [skyeye]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: skyeye-scaler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: skyeye-scaler
+subjects:
+  - kind: ServiceAccount
+    name: skyeye-scaler # namespace is filled in by kustomize
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skyeye-scaler
+  labels:
+    app.kubernetes.io/name: skyeye-scaler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skyeye-scaler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skyeye-scaler
+    spec:
+      serviceAccountName: skyeye-scaler
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: scaler
+          image: ghcr.io/dharmab/skyeye-scaler
+          # skyeye-scaler exits when SRS is unreachable or drops. Restart it in a loop instead of letting the
+          # container crash-loop (and trip CrashLoopBackOff alerts) while SRS is down; the webhook's watchdog
+          # stops SkyEye meanwhile.
+          command:
+            - /bin/sh
+            - -c
+            - |
+              trap 'kill -TERM "$pid" 2>/dev/null; wait "$pid"; exit 0' TERM INT
+              while true; do
+                /opt/skyeye/bin/skyeye-scaler "$@" & pid=$!
+                wait "$pid"
+                echo "{\"level\":\"warn\",\"message\":\"skyeye-scaler exited with $?, restarting in 30s\"}"
+                sleep 30 & pid=$!
+                wait "$pid"
+              done
+            - skyeye-scaler
+          env:
+            - name: SKYEYE_SCALER_SRS_EAM_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: skyeye, key: SKYEYE_SRS_EAM_PASSWORD, optional: true}
+          args:
+            - --webhook-url=http://127.0.0.1:8080/
+            - --srs-server-address=srs.example.com:5002 # same as srs-server-address in config.yaml
+            - --srs-frequencies=251.0AM,133.0AM,30.0FM # same as srs-frequencies in config.yaml
+            - --scale-interval=1m
+            - --stop-delay=10m
+            - --log-format=json
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+        - name: webhook
+          image: python:3.13-slim
+          command: [python3, -u, /app/skyeye-scaler-webhook.py]
+          env:
+            - {name: TARGET_DEPLOYMENT, value: skyeye}
+            - {name: WATCHDOG_SECONDS, value: "300"}
+            - {name: PYTHONDONTWRITEBYTECODE, value: "1"}
+          # Listens on 127.0.0.1 only (no Service, nothing else in the cluster can scale SkyEye), so the
+          # kubelet cannot reach it with httpGet: probe from inside the container.
+          readinessProbe:
+            exec: &probe
+              command: [python3, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"]
+            periodSeconds: 30
+            timeoutSeconds: 5
+          livenessProbe:
+            exec: *probe
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests: {cpu: 5m, memory: 24Mi}
+            limits: {memory: 96Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: webhook, mountPath: /app, readOnly: true}
+      volumes:
+        - name: webhook
+          configMap:
+            name: skyeye-scaler-webhook

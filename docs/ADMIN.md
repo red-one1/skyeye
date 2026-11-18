@@ -10,6 +10,8 @@ For a step-by-step guide, see one of the deployment guides.
 | Windows          | [guide](deployment/windows/cpu.md) | [guide](deployment/windows/gpu.md) | [guide](deployment/windows/api.md) |
 | Linux            | [guide](deployment/linux/cpu.md)   | [guide](deployment/linux/gpu.md)   | [guide](deployment/linux/api.md)   |
 
+To run SkyEye on a Kubernetes cluster (optionally with the autoscaler), see the [Kubernetes guide](deployment/kubernetes.md).
+
 # Getting Help
 
 If you need help with SkyEye, create a [GitHub issue](https://github.com/dharmab/skyeye/issues).
@@ -329,6 +331,8 @@ An example WinSW service definition is provided in the Windows release archive. 
 
 The scaler is also available as a container image at `ghcr.io/dharmab/skyeye-scaler`. A Linux binary is also provided in the Linux release archive, although without a service definition.
 
+For Kubernetes, [`init/kubernetes/`](../init/kubernetes/) includes a ready-made webhook that scales a SkyEye Deployment between 0 and 1; see the [Kubernetes guide](deployment/kubernetes.md).
+
 ## Multiple Instances (Experimental)
 
 You may want to run multiple instances of SkyEye on the same CPU:
@@ -360,3 +364,5 @@ Once you've decided on an architecture, follow the deployment guide for your ope
 | macOS            | N/A                                | [guide](deployment/macos/gpu.md)   | N/A                                |
 | Windows          | [guide](deployment/windows/cpu.md) | [guide](deployment/windows/gpu.md) | [guide](deployment/windows/api.md) |
 | Linux            | [guide](deployment/linux/cpu.md)   | [guide](deployment/linux/gpu.md)   | [guide](deployment/linux/api.md)   |
+
+To run SkyEye on a Kubernetes cluster (optionally with the autoscaler), see the [Kubernetes guide](deployment/kubernetes.md).

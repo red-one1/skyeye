@@ -1,0 +1,21 @@
+# Minimal SkyEye configuration for Kubernetes. See the sample config.yaml in the repository root for every
+# option. Keep secrets (srs-eam-password, telemetry-password, openai-api-key) out of this file: put them in the
+# Secret `skyeye` as SKYEYE_SRS_EAM_PASSWORD, SKYEYE_TELEMETRY_PASSWORD and SKYEYE_OPENAI_API_KEY.
+
+# Local speech recognition with whisper.cpp. The fetch-model init container downloads the file named here
+# from https://huggingface.co/ggerganov/whisper.cpp into the skyeye-models volume, so it must be under /models/.
+# ggml-small.en.bin is the recommended balance of speed and quality; see the sample config for alternatives.
+# For cloud speech recognition instead, enable components/openai-api in kustomization.yaml.
+recognizer: openai-whisper-local
+whisper-model: /models/ggml-small.en.bin
+
+telemetry-address: dcs.example.com:42674
+srs-server-address: srs.example.com:5002
+# If you change the frequencies, change --srs-frequencies in scaler.yaml too.
+srs-frequencies: 251.0AM,133.0AM,30.0FM
+
+callsign: Focus
+voice: feminine
+
+# JSON logs are easier to query in a cluster logging stack.
+log-format: json

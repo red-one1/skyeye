@@ -1,0 +1,13 @@
+# Storage for whisper.cpp models (local speech recognition). The fetch-model init container in skyeye.yaml
+# downloads the model named by `whisper-model` in config.yaml into this volume once; later starts reuse it.
+# ggml-small.en.bin is about 470 MiB, ggml-medium.en.bin about 1.5 GiB. Uses the cluster's default
+# StorageClass; set storageClassName to pick another one.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: skyeye-models
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi

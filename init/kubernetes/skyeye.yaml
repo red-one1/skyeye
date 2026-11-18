@@ -1,0 +1,97 @@
+# SkyEye GCI bot with local speech recognition (whisper.cpp on CPU). Settings come from the ConfigMap
+# `skyeye-config` (config.yaml) and the optional Secret `skyeye` (SKYEYE_* environment variables for passwords).
+# For cloud speech recognition, enable components/openai-api in kustomization.yaml.
+#
+# `replicas` is deliberately not set. With scaler.yaml deployed, skyeye-scaler owns it (1 while players are on
+# the SRS frequencies, 0 otherwise) and re-applying these manifests never overrides it. Without the scaler the
+# Deployment is created with 1 replica.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skyeye
+  labels:
+    app.kubernetes.io/name: skyeye
+spec:
+  strategy:
+    type: Recreate # never two bots with the same callsign on SRS; also required by the RWO model volume
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skyeye
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skyeye
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        # Downloads the model named by `whisper-model` in config.yaml unless it is already in the volume.
+        - name: fetch-model
+          image: curlimages/curl:8.23.0
+          env:
+            - name: MODEL_BASE_URL
+              value: https://huggingface.co/ggerganov/whisper.cpp/resolve/main
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              model=$(sed -n 's/^whisper-model:[[:space:]]*//p' /etc/skyeye/config.yaml | tr -d "\"'" | tail -n 1)
+              if [ -z "$model" ]; then echo "no whisper-model in config.yaml, nothing to download"; exit 0; fi
+              case "$model" in
+                /models/*) ;;
+                *) echo "whisper-model must be a path under /models/, got $model"; exit 1 ;;
+              esac
+              if [ -s "$model" ]; then echo "$model already present"; exit 0; fi
+              echo "downloading $(basename "$model") to $model"
+              curl -fsSL --retry 5 --retry-delay 10 -o "$model.part" "$MODEL_BASE_URL/$(basename "$model")"
+              mv "$model.part" "$model"
+              ls -l "$model"
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: config, mountPath: /etc/skyeye, readOnly: true}
+            - {name: models, mountPath: /models}
+      containers:
+        - name: skyeye
+          image: ghcr.io/dharmab/skyeye
+          args:
+            - --config-file=/etc/skyeye/config.yaml
+          envFrom:
+            - secretRef:
+                name: skyeye
+                optional: true
+          env:
+            - {name: HOME, value: /tmp}
+          # whisper.cpp runs one thread per CPU it can see (every core of the node), whatever the request, so the
+          # request only sets SkyEye's share when the node is busy. Like the upstream container setup there is no
+          # CPU limit: throttling would make recognition stutter. Run it on a node with at least 4 real cores that
+          # is not otherwise busy (see docs/deployment/kubernetes.md); raise the request on a contended node.
+          resources:
+            requests: {cpu: "1", memory: 3Gi}
+            limits: {memory: 4Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: config, mountPath: /etc/skyeye, readOnly: true}
+            - {name: models, mountPath: /models, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          configMap:
+            name: skyeye-config
+        - name: models
+          persistentVolumeClaim:
+            claimName: skyeye-models
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}

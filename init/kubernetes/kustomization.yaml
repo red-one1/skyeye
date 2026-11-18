@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: skyeye
+resources:
+  - namespace.yaml
+  - skyeye.yaml
+  # Model volume for local speech recognition (removed by components/openai-api).
+  - models.yaml
+  # Optional autoscaler: starts SkyEye only while players are on its SRS frequencies.
+  # Remove this line to run SkyEye 24/7 instead (the Deployment then stays at 1 replica).
+  - scaler.yaml
+# Cloud speech recognition (OpenAI Whisper API) instead of local whisper.cpp: uncomment.
+# components:
+#   - components/openai-api
+configMapGenerator:
+  # Everything in this ConfigMap is mounted at /etc/skyeye/. Add custom-aircraft.yaml or locations.yaml here
+  # and point aircraft-file / locations-file at /etc/skyeye/<file> in config.yaml.
+  - name: skyeye-config
+    files:
+      - config.yaml
+  - name: skyeye-scaler-webhook
+    files:
+      - skyeye-scaler-webhook.py
+images:
+  # Pin versions from https://github.com/dharmab/skyeye/releases instead of latest.
+  - name: ghcr.io/dharmab/skyeye
+    newTag: latest
+  - name: ghcr.io/dharmab/skyeye-scaler
+    newTag: latest
